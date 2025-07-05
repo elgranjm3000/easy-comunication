@@ -53,28 +53,16 @@ export async function initializeDatabase() {
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS listnumber (
         id VARCHAR(36) PRIMARY KEY,
-        port VARCHAR(100) NOT NULL,
-        iccid VARCHAR(100) NOT NULL,
-        imei VARCHAR(100) NOT NULL,
-        imsi VARCHAR(100) NOT NULL,
-        sn VARCHAR(100) NOT NULL,
+        port VARCHAR(100) NULL,
+        iccid VARCHAR(100) NULL,
+        imei VARCHAR(100) NULL,
+        imsi VARCHAR(100) NULL,
+        sn VARCHAR(100) NULL,
         status VARCHAR(50) NOT NULL DEFAULT 'active',
-        batch_id VARCHAR(100) NOT NULL,
-        users_id VARCHAR(100) NOT NULL,
+        batch_id VARCHAR(100) NULL,
+        users_id VARCHAR(100) NULL,
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_port (port),
-        INDEX idx_iccid (iccid),
-        INDEX idx_imei (imei),
-        INDEX idx_imsi (imsi),
-        INDEX idx_sn (sn),
-        INDEX idx_status (status),
-        INDEX idx_batch_id (batch_id),
-        INDEX idx_users_id (users_id),
-        UNIQUE KEY unique_iccid (iccid),
-        UNIQUE KEY unique_imei (imei),
-        UNIQUE KEY unique_imsi (imsi),
-        UNIQUE KEY unique_sn (sn)
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,       
       ) ENGINE=InnoDB DEFAULT CHARSET=latin1
     `);
 
