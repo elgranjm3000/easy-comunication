@@ -30,6 +30,7 @@ interface UpdateListNumberParams {
 interface AddNumberResponse  {
   success?: boolean;
   error?: string;
+  data?: string[];
 };
 
 export async function POST(request: NextRequest) {
@@ -69,13 +70,13 @@ export async function POST(request: NextRequest) {
           const addResult = await addNumber({
             phoneNumbers: [sn],
             countryId: "col",            
-          });
+          }) as AddNumberResponse;
 
           if (!addResult.success) {
             throw new Error(addResult.error || "Error al agregar número");
           }
 
-          batchId = addResult.data.data; // batchId es ahora string | undefined
+          batchId = addResult.data?.data; // batchId es ahora string | undefined
           resultEntry.batch = batchId;
           resultEntry.message = "Número agregado al batch";
 
