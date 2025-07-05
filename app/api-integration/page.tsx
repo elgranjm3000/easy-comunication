@@ -384,7 +384,7 @@ export default function ApiIntegrationPage() {
           <Alert className="border-blue-200 bg-blue-50">
             <Info className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800">
-              <strong>Información sobre CORS:</strong> Si experimentas errores de CORS, activa el "Modo Proxy" 
+              <strong>Información sobre CORS:</strong> Si experimentas errores de CORS, activa el &#34;Modo Proxy&#34;
               para hacer las solicitudes a través del servidor de la aplicación.
             </AlertDescription>
           </Alert>
@@ -616,7 +616,7 @@ export default function ApiIntegrationPage() {
                   <div className="text-center py-8 text-muted-foreground">
                     <Globe className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>No se ha realizado ninguna conexión aún</p>
-                    <p className="text-sm">Completa el formulario y haz clic en "Conectar API"</p>
+                    <p className="text-sm">Completa el formulario y haz clic en &#34;Conectar API&#34;</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -641,7 +641,7 @@ export default function ApiIntegrationPage() {
                         <Shield className="h-4 w-4 text-yellow-600" />
                         <AlertDescription className="text-yellow-800">
                           <strong>Sugerencia:</strong> Este parece ser un error de CORS. 
-                          Intenta activar el "Modo Proxy\" para solucionarlo.
+                          Intenta activar el &#34;Modo Proxy\&#34; para solucionarlo.
                         </AlertDescription>
                       </Alert>
                     )}

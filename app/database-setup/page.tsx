@@ -253,14 +253,14 @@ export default function DatabaseSetupPage() {
               <div className="space-y-3">
                 <h4 className="font-medium">3. Initialize Tables</h4>
                 <div className="text-sm text-muted-foreground">
-                  <p>Click "Initialize Database" above to create all required tables and indexes.</p>
+                  <p>Click &quot;Initialize Database&quot; above to create all required tables and indexes.</p>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <h4 className="font-medium">4. Verify Setup</h4>
                 <div className="text-sm text-muted-foreground">
-                  <p>Use "Check Status" to verify the connection and table creation.</p>
+                  <p>Use &#34;Check Status&#34; to verify the connection and table creation.</p>
                 </div>
               </div>
             </div>
