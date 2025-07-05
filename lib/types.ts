@@ -67,6 +67,8 @@ export interface AddNumberParams {
   countryId?: string;
   apiKey?: string;
   endpoint?: string;
+  success?: boolean;
+  error?: string;
 }
 
 export interface SearchNumberParams {

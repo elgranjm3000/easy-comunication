@@ -35,7 +35,7 @@ export const addNumber = async ({
   phoneNumbers,
   countryId = "col",
   apiKey = process.env.KEY_PROVEEDOR,
-  endpoint = process.env.ADDRESS_PROVEEDOR
+  endpoint = process.env.ADDRESS_PROVEEDOR  
 }): Promise<AddNumberParams[]> => {
   try {
     // Validación básica de los números telefónicos

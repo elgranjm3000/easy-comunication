@@ -27,6 +27,11 @@ interface UpdateListNumberParams {
   batch_id?: string; // Acepta string | undefined pero no null
 }
 
+interface AddNumberResponse  {
+  success?: boolean;
+  error?: string;
+};
+
 export async function POST(request: NextRequest) {
   try {
     const { status } = await request.json();
@@ -48,7 +53,7 @@ export async function POST(request: NextRequest) {
           sn, 
           success: false,
           message: 'Procesamiento iniciado'
-        };
+        };        
 
         try {
           if (!sn) {
@@ -63,7 +68,7 @@ export async function POST(request: NextRequest) {
           // 2. Agregar número al batch
           const addResult = await addNumber({
             phoneNumbers: [sn],
-            countryId: "col"
+            countryId: "col",            
           });
 
           if (!addResult.success) {
