@@ -202,7 +202,7 @@ class ApiClient {
     users_id?: string;
     sn?:string;  
     offset?:string;
-    limit?:string;
+    limit?: string;
     status?:string;
       
   }): Promise<ApiResponse<listNumber[]>> {

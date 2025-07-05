@@ -30,8 +30,14 @@ interface UpdateListNumberParams {
 interface AddNumberResponse  {
   success?: boolean;
   error?: string;
-  data?: string[];
+  data?: {
+    data: any[]
+  };
 };
+
+interface ApiListResponse<T = any> {
+  data: T[];  
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let batchId: string | undefined; // Cambiado de string | null a string | undefined
+    let batchId: any; // Cambiado de string | null a string | undefined
     const results: ResultEntry[] = [];
 
     await Promise.all(
@@ -84,7 +90,7 @@ export async function POST(request: NextRequest) {
           let statusBatch = '1'; // Valor por defecto
           resultEntry.statusBatch = '1';
           if (batchId) { // Verificamos que batchId no sea undefined
-            const batchStatusResult = await searchNumber({ batch_id: batchId });
+            const batchStatusResult = await searchNumber({ batch_id: batchId }) as AddNumberResponse;
             
             if (batchStatusResult.success && batchStatusResult.data?.data?.[0]) {
               statusBatch = batchStatusResult.data.data[0].Phone_Status || '1';
@@ -93,7 +99,7 @@ export async function POST(request: NextRequest) {
           }
 
           // 4. Obtener y actualizar número
-          const listResponse = await apiClient.getListNumbers({ sn });
+          const listResponse = await apiClient.getListNumbers({ sn }) as ApiListResponse ;
           const listNumber = listResponse.data[0];
 
           if (!listNumber?.id) {

@@ -26,6 +26,14 @@ import { NumberDetailsDialog } from './number-details-dialog';
 import { getNumber, addNumber, searchNumber } from '@/services/numbers';
 import { apiClient } from '@/lib/api-client';
 
+interface addAPI  {
+  success?: boolean;
+  error?: string;
+  data?:any;
+  pagination?:any;
+
+};
+
 export function NumbersTable() {
   const [numberAll, setNumberAll] = useState<numberAll[]>([]);
   const [selectedNumber, setSelectedNumber] = useState<NumberEntry | null>(null);
@@ -36,7 +44,7 @@ export function NumbersTable() {
   useEffect(() => {
     const fetchNumbers = async () => {
       try {              
-       const listNumber = await apiClient.getListNumbers();
+       const listNumber = await apiClient.getListNumbers() as addAPI;
        setNumberAll(listNumber.data);
       } catch (error) {
         console.error('Error fetching numbers:', error);
@@ -104,7 +112,7 @@ export function NumbersTable() {
                 <TableHead>IMEI</TableHead>
                 <TableHead>IMSI</TableHead>
                 <TableHead>SN</TableHead>                
-                <TableHead className="w-12"></TableHead>
+              
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -116,29 +124,7 @@ export function NumbersTable() {
                     <TableCell>{number.imei}</TableCell>
                     <TableCell>{number.imsi}</TableCell>
                     <TableCell>{number.sn}</TableCell>                   
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => {
-                            setSelectedNumber(number);
-                            setIsDetailsOpen(true);
-                          }}>
-                            <Eye className="mr-2 h-4 w-4" /> View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                   
                   </TableRow>
                 ))
               ) : (

@@ -63,7 +63,7 @@ export interface DashboardMetrics {
 }
 
 export interface AddNumberParams {
-  phoneNumbers: string[] | number[];
+  phoneNumbers?: any[];
   countryId?: string;
   apiKey?: string;
   endpoint?: string;

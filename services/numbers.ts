@@ -1,9 +1,28 @@
 "use server"
 
-import { numberAll,AddNumberParams } from '@/lib/types';
+import { numberAll } from '@/lib/types';
 import { promises } from 'dns';
 
-export const getNumber = async (): Promise<numberAll[]> => {
+interface PhoneAddBatchParams {
+  Country_ID: string;
+  Phone_Num: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data?: any; // Ajusta este tipo según la respuesta real de tu API
+  message: string;
+  error?: string;
+}
+
+interface AddNumberParams {
+  phoneNumbers?: string[]; // o number[] si son números
+  countryId?: string;
+  apiKey?: string;
+  endpoint?: string;
+  batch_id?: any;
+}
+export const getNumber = async (): Promise<numberAll[] | undefined> => {
   try {
     const apiUrl = `${process.env.BASE_URL_DINSTAR}`
     const response = await fetch(apiUrl, {
@@ -36,7 +55,7 @@ export const addNumber = async ({
   countryId = "col",
   apiKey = process.env.KEY_PROVEEDOR,
   endpoint = process.env.ADDRESS_PROVEEDOR  
-}): Promise<AddNumberParams[]> => {
+} : AddNumberParams ): Promise<ApiResponse> => {
   try {
     // Validación básica de los números telefónicos
     if (!phoneNumbers || !Array.isArray(phoneNumbers) || phoneNumbers.length === 0) {
@@ -73,7 +92,7 @@ export const addNumber = async ({
       data: data,
       message: "Números agregados correctamente"
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error al agregar números:', error.message);
     return {
       success: false,
@@ -88,7 +107,7 @@ export const searchNumber = async ({
   batch_id, 
   apiKey = process.env.KEY_PROVEEDOR,
   endpoint = process.env.ADDRESS_PROVEEDOR
-}): Promise<SearchNumberParams[]> => {
+} : AddNumberParams ): Promise<ApiResponse> => {
   try {
     // Validación básica de los números telefónicos
     if (!batch_id || batch_id.length === 0) {
@@ -121,7 +140,7 @@ export const searchNumber = async ({
       data: data,
       message: "Status de numeros"
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error es estatus:', error.message);
     return {
       success: false,

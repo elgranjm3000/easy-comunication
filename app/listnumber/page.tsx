@@ -68,6 +68,14 @@ interface Stats {
   recentActivity: Array<{ date: string; count: number }>;
 }
 
+interface addAPI  {
+  success?: boolean;
+  error?: string;
+  data?:any;
+  pagination?:any;
+
+};
+
 export default function ListNumberPage() {
   const { user } = useAuth();
   const [listNumbers, setListNumbers] = useState<ListNumber[]>([]);
@@ -126,7 +134,7 @@ export default function ListNumberPage() {
         limit:itemsPerPage.toString(),
         offset:offset.toString(),
         status:statusFilter.toString()
-      });
+      }) as addAPI;
 
       
       if (data.success) {
@@ -242,9 +250,9 @@ export default function ListNumberPage() {
     setCurrentPage(page);
     // Trigger data fetch with new page
     const data = await apiClient.getListNumbers({        
-        offset:page,
-        limit:itemsPerPage
-    });
+        offset: page.toString(),
+        limit: itemsPerPage.toString()
+    }) as addAPI;
 
     if (data.success) {
         setListNumbers(data.data);
@@ -264,9 +272,9 @@ export default function ListNumberPage() {
     // Trigger data fetch with new limit
 
     const data = await apiClient.getListNumbers({        
-        offset:1,
-        limit:newItemsPerPage
-    });
+        offset: currentPage.toString(),
+        limit:newItemsPerPage.toString()
+    }) as addAPI;
 
     if (data.success) {
         setListNumbers(data.data);

@@ -24,6 +24,14 @@ interface DataContextType {
   setPriorityFilter: (priority: Priority | 'all') => void;
 }
 
+interface addAPI  {
+  success?: boolean;
+  error?: string;
+  data?:any;
+  pagination?:any;
+
+};
+
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
@@ -85,7 +93,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await apiClient.getListNumbers();      
+      const data = await apiClient.getListNumbers() as addAPI;      
       setNumbersAll(data.data);
     };
     fetchData();
