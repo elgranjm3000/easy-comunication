@@ -28,6 +28,20 @@ export type numberAll = {
   sn: string;
 }
 
+
+export type receiveSms = {
+  Item_ID: string;
+  Phone_GetTime: string;
+  Phone_Num: string;
+  Country_ID: string;
+  Phone_IsRet?:boolean;
+  Phone_RetTime?:string;
+  Phone_Remark?:string;
+  Phone_RemarkTime?:string;
+}
+
+
+
 export type ProcessStage = 
   | 'initial' 
   | 'in-progress' 

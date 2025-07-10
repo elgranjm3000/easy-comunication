@@ -1,7 +1,7 @@
 // API client for interacting with the MySQL backend
 
-//const API_BASE_URL = `${process.env.BASE_URL_NEXT}/api`;
-const API_BASE_URL = "/api";
+const API_BASE_URL = `${process.env.BASE_URL_NEXT}/api`;
+//const API_BASE_URL = "/api";
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -24,12 +24,22 @@ export interface listNumber {
   iccid?: string;
   imei?: string;
   imsi?: string;
+  data?:any,
   sn:string;
   batch_id: string;
   status: string;
   offset: string;
   limit:string;
 }
+
+
+export interface numberHistory {  
+  Item_ID: string;
+  Phone_GetTime?: string;
+  Phone_Num?: string;
+  Country_ID?: string;  
+}
+
 
 export interface NumberData {
   id: string;
@@ -107,6 +117,16 @@ class ApiClient {
   }
 
   // Numbers API
+  async apiSms(params?: {
+    port?: string;    
+  }): Promise<ApiResponse<NumberData[]>> {
+    const searchParams = new URLSearchParams();    
+    if (params?.port) searchParams.set('port', params.port);
+    const query = searchParams.toString();
+    return this.request<NumberData[]>(`/sms${query ? `?${query}` : ''}`);
+  }
+
+
   async getNumbers(params?: {
     search?: string;
     status?: string;
@@ -216,12 +236,32 @@ class ApiClient {
     if (params?.status) searchParams.set('status', params.status);
 
     const query = searchParams.toString();
+    console.log(query);
     return this.request<listNumber[]>(`/listnumber${query ? `?${query}` : ''}`);
   }
 
+  async createNumberHistory(data: {
+    Item_ID: string;
+    Phone_GetTime: string;
+    Phone_Num: string;
+    Country_ID: string;    
+  }): Promise<ApiResponse<numberHistory>> {
+    return this.request<numberHistory>('/listnumber/history', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 
-  async createNumberHistory(): Promise<ApiResponse<listNumber>> {
-    return this.request<listNumber>('/listnumber/history');
+
+  async updateHistory(id: string, data: {
+    id?: string; 
+    mensaje?: string;
+    
+  }): Promise<ApiResponse<listNumber>> {
+    return this.request<listNumber>(`/listnumber/history/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   }
 
   async createListNumber(data: {

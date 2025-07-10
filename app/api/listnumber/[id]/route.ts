@@ -7,7 +7,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const connection = await connectToDatabase();
+  const connection = await connectToDatabase();  
   
   try {
     const { id } = params;
@@ -15,6 +15,7 @@ export async function GET(
     const [result] = await connection.execute(`
       SELECT * FROM listnumber WHERE id = ?
     `, [id]);
+    console.log(result);
 
     if ((result as RowDataPacket[]).length === 0) {
       return NextResponse.json(

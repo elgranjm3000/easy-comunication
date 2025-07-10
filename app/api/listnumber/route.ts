@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const sn = searchParams.get('sn') || '';
+    const id = searchParams.get('id') || '';
     const status = searchParams.get('status') || '';
     const batch_id = searchParams.get('batch_id') || '';
     const users_id = searchParams.get('users_id') || '';
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     // Add search filter (searches across multiple fields)
     if (search) {
       query += ` AND (
+        id = ? OR
         port LIKE ? OR 
         iccid LIKE ? OR 
         imei LIKE ? OR 
@@ -39,6 +41,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Add status filter
+
+    if (id && id !== 'all') {
+      query += ` AND id = ?`;
+      params.push(id);
+    }
+
     if (status && status !== 'all') {
       query += ` AND status = ?`;
       params.push(status);
@@ -51,8 +59,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (sn && sn !== 'all') {
-        query += ` AND sn = ?`;
-        params.push(sn);
+        query += ` AND sn like ?`;
+        params.push(`%${sn}%`);
     }
 
     // Add users_id filter
@@ -72,6 +80,7 @@ export async function GET(request: NextRequest) {
     
     if (search) {
       countQuery += ` AND (
+        id = ? OR
         port LIKE ? OR 
         iccid LIKE ? OR 
         imei LIKE ? OR 
@@ -83,6 +92,13 @@ export async function GET(request: NextRequest) {
       const searchTerm = `%${search}%`;
       countParams.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
     }
+
+    if (id && id !== 'all') {
+      countQuery += ` AND id = ?`;
+      params.push(id);
+    }
+
+
     if (status && status !== 'all') {
       countQuery += ` AND status = ?`;
       countParams.push(status);

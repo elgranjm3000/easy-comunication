@@ -42,6 +42,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Download, Upload, BarChart3, Smartphone, Sigma as Sim, Hash, Users, Package, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { getSmsReceiver } from '@/services/numbers';
 
 interface ListNumber {
   id: string;
@@ -113,7 +114,7 @@ export default function ListNumberPage() {
     };
     fetchAll(); // Ejecutar inmediatamente
 
-    const interval = setInterval(fetchAll, 10000);
+    const interval = setInterval(fetchAll, 4000);
         
     return () => clearInterval(interval);
 
@@ -135,8 +136,10 @@ export default function ListNumberPage() {
         offset:offset.toString(),
         status:statusFilter.toString()
       }) as addAPI;
-
       
+      await getSmsReceiver()
+      await apiClient.createNumberHistory()
+
       if (data.success) {
         setListNumbers(data.data);
         setTotalItems(data.pagination?.total || 0);
@@ -272,7 +275,7 @@ export default function ListNumberPage() {
     // Trigger data fetch with new limit
 
     const data = await apiClient.getListNumbers({        
-        offset: currentPage.toString(),
+        offset: "1".toString(),
         limit:newItemsPerPage.toString()
     }) as addAPI;
 
