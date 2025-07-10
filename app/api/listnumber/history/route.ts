@@ -50,8 +50,8 @@ export async function GET(request: NextRequest) {
     query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
-    const [rows] = await connection.execute<RowDataPacket[]>(query, params);
     await getSmsReceiver()
+    const [rows] = await connection.execute<RowDataPacket[]>(query, params);
 
     for (const row of rows) {      
       const responsePhone = await GetResultPhoneList(row.Country_ID,row.Phone_Num,row.Item_ID) as receiveSms[];

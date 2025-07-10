@@ -524,7 +524,7 @@ export default function ListNumberPage() {
                       <Smartphone className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Records</p>
+                      <p className="text-sm font-medium text-muted-foreground">Total registro</p>
                       <p className="text-3xl font-bold">{stats.totalRecords}</p>
                     </div>
                   </div>
@@ -538,7 +538,7 @@ export default function ListNumberPage() {
                       <CheckCircle className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Active</p>
+                      <p className="text-sm font-medium text-muted-foreground">Activos</p>
                       <p className="text-3xl font-bold">
                         {stats.distributions.status.find(s => s.status === '1')?.count || 0}
                       </p>
