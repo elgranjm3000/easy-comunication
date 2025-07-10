@@ -63,7 +63,8 @@ export async function PUT(
         Phone_RetTime, 
         Phone_Remark, 
         Phone_RemarkTime,
-        mensaje 
+        mensaje,
+        code
       } = body;
   
       // Verificar si el registro existe
@@ -83,6 +84,11 @@ export async function PUT(
       const updateValues: any[] = [];
   
       // Agregar campos a actualizar si están presentes en el body
+      if (code !== undefined) {
+        updateFields.push('code = ?');
+        updateValues.push(code);
+      }
+      
       if (Item_ID !== undefined) {
         updateFields.push('Item_ID = ?');
         updateValues.push(Item_ID);

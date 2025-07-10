@@ -42,7 +42,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Download, Upload, BarChart3, Smartphone, Sigma as Sim, Hash, Users, Package, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
-import { getSmsReceiver } from '@/services/numbers';
 
 interface ListNumber {
   id: string;
@@ -137,7 +136,6 @@ export default function ListNumberPage() {
         status:statusFilter.toString()
       }) as addAPI;
       
-      await getSmsReceiver()
       await apiClient.createNumberHistory()
 
       if (data.success) {

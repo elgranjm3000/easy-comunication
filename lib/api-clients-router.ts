@@ -253,10 +253,9 @@ class ApiClient {
   }
 
 
-  async updateHistory(id: string, data: {
-    id?: string; 
+  async updateHistory(id: string, data: {   
     mensaje?: string;
-    
+    code?: string;    
   }): Promise<ApiResponse<listNumber>> {
     return this.request<listNumber>(`/listnumber/history/${id}`, {
       method: 'PUT',

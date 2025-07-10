@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase, generateUUID } from '@/lib/database';
 import { RowDataPacket } from 'mysql2';
-import { GetResultPhoneList } from '@/services/numbers';
+import { GetResultPhoneList,getSmsReceiver } from '@/services/numbers';
 import { apiClient } from '@/lib/api-clients-router';
 import { sendSms } from '@/services/numbers';
 import { receiveSms } from '@/lib/types';
@@ -21,10 +21,12 @@ export interface ApiResponse<T = any> {
   };
   mensajes?:string;
   contenido?:string;
+  code?:string;
 }
 
 interface Mensaje {
   contenido?: string;
+  code?: string;
   
 }
 
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     let query = `
       SELECT * FROM serviceHistory
-      WHERE 1=1 and mensaje IS NULL
+      WHERE 1=1 and (code IS NULL or code = 0)
     `;
     
     const params: any[] = [];
@@ -49,6 +51,7 @@ export async function GET(request: NextRequest) {
     params.push(limit, offset);
 
     const [rows] = await connection.execute<RowDataPacket[]>(query, params);
+    await getSmsReceiver()
 
     for (const row of rows) {      
       const responsePhone = await GetResultPhoneList(row.Country_ID,row.Phone_Num,row.Item_ID) as receiveSms[];
@@ -83,10 +86,15 @@ export async function GET(request: NextRequest) {
                     countryId: "col",
                   })
 
+                  const codeMensaje = addResult.data.code
+                  console.log("sendsms: ",addResult.data.code);
+                  console.log("mensaje: ",(ultimoMensaje as Mensaje).contenido );
                   await apiClient.updateHistory(row.id, {
-                    mensaje: (ultimoMensaje as Mensaje).contenido                    
+                    mensaje: (ultimoMensaje as Mensaje).contenido || "-",
+                    code: codeMensaje
                   });
-                  console.log("sendsms: ",addResult);
+
+                 
             } else {
                   console.log("No hay mensajes disponibles.");
             }
@@ -159,8 +167,8 @@ export async function POST(request: NextRequest) {
 
     const [existingRecords] = await connection.execute(`
     SELECT id FROM serviceHistory 
-    WHERE Phone_Num = ? and Item_ID = ?
-  `, [Phone_Num, Item_ID]);
+    WHERE Phone_Num = ?
+  `, [Phone_Num]);
 
     if ((existingRecords as RowDataPacket[]).length > 0) {
       return NextResponse.json(

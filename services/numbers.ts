@@ -14,6 +14,7 @@ interface ApiResponse {
   data?: any; // Ajusta este tipo según la respuesta real de tu API
   message: string;
   error?: string;
+  code?: string;
 }
 
 interface createNumberHistory {
