@@ -136,7 +136,7 @@ export default function ListNumberPage() {
         status:statusFilter.toString()
       }) as addAPI;
       
-      await apiClient.createNumberHistory()
+      //await apiClient.createNumberHistory()
 
       if (data.success) {
         setListNumbers(data.data);
