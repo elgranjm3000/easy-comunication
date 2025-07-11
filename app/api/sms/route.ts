@@ -116,9 +116,7 @@ export async function POST(request: NextRequest) {
       const validSMS = chunk.filter(sms => {
         const { st, active, slot_active, sn } = sms;
         return (
-          Number(st) === 1 &&
-          Number(active) === 1 &&
-          Number(slot_active) === 1
+          Number(active) === 1
         );
       });
 
