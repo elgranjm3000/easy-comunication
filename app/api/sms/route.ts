@@ -27,9 +27,9 @@ interface SMSData {
   imei: string;
   imsi: string;
   sn?: string;
-  st?: string | number;
-  active?: string | number; 
-  slot_active?: string | number;
+  st?: string | number | undefined;
+  active?: string | number | undefined; 
+  slot_active?: string | number | undefined;
 }
 
 interface ResultEntry {
@@ -106,9 +106,9 @@ export async function POST(request: NextRequest) {
             Number(slot_active) === 1
           );
           
-          if (!flagsValid || !sn) return; // Saltamos si no cumple requisitos
+          if (!sn) return; // Saltamos si no cumple requisitos
 
-          await apiClient.createListNumber({ port, iccid, imei, imsi, sn });
+          await apiClient.createListNumber({ port, iccid, imei, imsi, sn, st, active, slot_active });
         })
       );
 
@@ -116,10 +116,9 @@ export async function POST(request: NextRequest) {
       const validSMS = chunk.filter(sms => {
         const { st, active, slot_active, sn } = sms;
         return (
-          Number(st) === 3 &&
+          Number(st) === 1 &&
           Number(active) === 1 &&
-          Number(slot_active) === 1 &&
-          Boolean(sn)
+          Number(slot_active) === 1
         );
       });
 

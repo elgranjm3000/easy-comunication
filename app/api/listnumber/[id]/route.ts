@@ -59,7 +59,10 @@ export async function PUT(
       iccid, 
       imei, 
       imsi, 
-      sn, 
+      sn,
+      st,
+      active,
+      slot_active, 
       status, 
       batch_id, 
       users_id 
@@ -98,6 +101,22 @@ export async function PUT(
     // Build dynamic update query
     const updateFields: string[] = [];
     const updateValues: any[] = [];
+
+    if (st !== undefined) {
+      updateFields.push('st_status = ?');
+      updateValues.push(st);
+    }
+
+    if (active !== undefined) {
+      updateFields.push('active_status = ?');
+      updateValues.push(active);
+    }
+
+
+    if (slot_active !== undefined) {
+      updateFields.push('slot_active_status = ?');
+      updateValues.push(slot_active);
+    }
 
     if (port !== undefined) {
       updateFields.push('port = ?');

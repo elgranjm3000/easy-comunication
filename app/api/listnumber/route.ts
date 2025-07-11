@@ -153,7 +153,11 @@ export async function POST(request: NextRequest) {
       imei = 'N/A', 
       imsi = 'N/A', 
       sn, 
-      status = '0'     
+      st,
+      active,
+      slot_active,
+      status = '0'  
+       
     } = body;
 
     console.log("body: ", body);
@@ -175,13 +179,22 @@ export async function POST(request: NextRequest) {
     `, [sn]);
 
     if ((existingRecords as RowDataPacket[]).length > 0) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Duplicate entry:  SN already exists' 
-        },
-        { status: 409 }
-      );
+            await connection.execute(`
+            UPDATE listnumber 
+            SET 
+              st_status = ?,
+              active_status = ?,
+              slot_active_status = ?
+            WHERE sn = ?
+          `, [st, active, slot_active, sn]); // Asegúrate de que estas variables estén definidas
+        
+          return NextResponse.json(
+            { 
+              success: true, 
+              message: 'Registro actualizado correctamente' 
+            },
+            { status: 200 }
+          );
     }
 
     const listNumberId = generateUUID();
@@ -189,9 +202,9 @@ export async function POST(request: NextRequest) {
     // Insert listnumber
     await connection.execute(`
       INSERT INTO listnumber (
-        id, port, iccid, imei, imsi, sn, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, [listNumberId, port, iccid, imei, imsi, sn, status]);
+        id, port, iccid, imei, imsi, sn, status, st_status, active_status, slot_active_status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)
+    `, [listNumberId, port, iccid, imei, imsi, sn, status, st, active, slot_active]);
 
     // Fetch the created record
     const [result] = await connection.execute(`

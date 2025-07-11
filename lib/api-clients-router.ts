@@ -26,6 +26,9 @@ export interface listNumber {
   imsi?: string;
   data?:any,
   sn:string;
+  st?: string | number | undefined;
+  active?: string | number | undefined;
+  slot_active?: string | number | undefined;
   batch_id: string;
   status: string;
   offset: string;
@@ -268,7 +271,10 @@ class ApiClient {
     iccid: string;
     imei: string;
     imsi: string;
-    sn: string;    
+    sn: string | number | undefined;
+    st: string | number | undefined;
+    active: string | number | undefined;
+    slot_active: string | number | undefined;     
   }): Promise<ApiResponse<listNumber>> {
     return this.request<listNumber>('/listnumber', {
       method: 'POST',
