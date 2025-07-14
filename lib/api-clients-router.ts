@@ -283,16 +283,23 @@ class ApiClient {
   }
 
 
-  async updateListNumber(id: string, data: {
-    id?: string; 
-    batch_id?: string;
-    status?: string;     
-  }): Promise<ApiResponse<listNumber>> {
-    return this.request<listNumber>(`/listnumber/${id}`, {
+  async updateListNumber(
+    id?: string, // Hacer el `id` opcional
+    data?: {     // Hacer el `data` opcional
+      id?: string; 
+      batch_id?: string;
+      status?: string;     
+    }
+  ): Promise<ApiResponse<listNumber>> {
+    const url = id ? `/listnumber/${id}` : `/listnumber/updateAll`;
+    
+    return this.request<listNumber>(url, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: data ? JSON.stringify(data) : undefined,
     });
   }
+
+ 
 
   // Metrics API
   async getMetrics(): Promise<ApiResponse<MetricsData>> {

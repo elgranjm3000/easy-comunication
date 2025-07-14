@@ -3,7 +3,7 @@ import { connectToDatabase, generateUUID } from '@/lib/database';
 import { RowDataPacket } from 'mysql2';
 import { GetResultPhoneList,getSmsReceiver } from '@/services/numbers';
 import { apiClient } from '@/lib/api-clients-router';
-import { sendSms } from '@/services/numbers';
+import { sendSms, deleteNumber } from '@/services/numbers';
 import { receiveSms } from '@/lib/types';
 
 
@@ -87,12 +87,24 @@ export async function GET(request: NextRequest) {
                   })
 
                   const codeMensaje = addResult.data.code
-                  console.log("sendsms: ",addResult.data.code);
-                  console.log("mensaje: ",(ultimoMensaje as Mensaje).contenido );
-                  await apiClient.updateHistory(row.id, {
-                    mensaje: (ultimoMensaje as Mensaje).contenido || "-",
-                    code: codeMensaje
-                  });
+               
+                  if (codeMensaje == 0){
+
+                    const phoneNumbers = Array.isArray(row.Phone_Num) 
+                      ? row.Phone_Num 
+                      : [row.Phone_Num];
+                    const addResultDelete = await deleteNumber({
+                      phoneNumbers: phoneNumbers,                       
+                      countryId: "col",
+                    }) 
+
+                    console.log("delete numero por que no responde loco: ",addResultDelete);
+                  }else{
+                      await apiClient.updateHistory(row.id, {
+                        mensaje: (ultimoMensaje as Mensaje).contenido || "-",
+                        code: codeMensaje
+                      });
+                  }
 
                  
             } else {

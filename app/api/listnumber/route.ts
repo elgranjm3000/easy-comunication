@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       params.push(users_id);
     }
 
-    query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    query += ` ORDER BY status DESC LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
     const [rows] = await connection.execute(query, params);
@@ -156,8 +156,7 @@ export async function POST(request: NextRequest) {
       st,
       active,
       slot_active,
-      status = '0'  
-       
+      status = '0'       
     } = body;
 
     console.log("body: ", body);

@@ -175,6 +175,103 @@ export const addNumber = async ({
 };
 
 
+
+export const deleteAllNumber = async ({
+  apiKey = process.env.KEY_PROVEEDOR,
+  endpoint = process.env.ADDRESS_PROVEEDOR  
+} : AddNumberParams ): Promise<ApiResponse> => {
+  try {
+    // Validación básica de los números telefónicos  
+
+    const apiUrl = `${endpoint}?key=${apiKey}`;
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        act: "PhoneDeleteAll"
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `Error en la solicitud: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    console.log('Números all eliminado:', data);
+    return {
+      success: true,
+      data: data,
+      message: "Números eliminado correctamente"
+    };
+  } catch (error: any) {
+    console.error('Error al eliminar los números:', error.message);
+    return {
+      success: false,
+      error: error.message,
+      message: "Error al eliminar números"
+    };
+  }
+};
+
+export const deleteNumber = async ({
+  phoneNumbers,
+  countryId = "col",
+  apiKey = process.env.KEY_PROVEEDOR,
+  endpoint = process.env.ADDRESS_PROVEEDOR  
+} : AddNumberParams ): Promise<ApiResponse> => {
+  try {
+    // Validación básica de los números telefónicos
+    if (!phoneNumbers || !Array.isArray(phoneNumbers) || phoneNumbers.length === 0) {
+      throw new Error("Debe proporcionar un array válido de números telefónicos");
+    }
+
+    const apiUrl = `${endpoint}?key=${apiKey}`;
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        act: "PhoneDeleteBatch",
+        PhoneList: phoneNumbers.map(phoneNum => ({
+          Country_ID: countryId,
+          Phone_Num: phoneNum.toString().trim() // Aseguramos que sea string y limpiamos espacios
+        }))
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `Error en la solicitud: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    console.log('Números eliminados exitosamente:', data);
+    return {
+      success: true,
+      data: data,
+      message: "Números eliminado correctamente"
+    };
+  } catch (error: any) {
+    console.error('Error al eliminar números:', error.message);
+    return {
+      success: false,
+      error: error.message,
+      message: "Error al eliminar números"
+    };
+  }
+};
+
+
 export const sendSms = async ({
   phoneNumbers,
   content,

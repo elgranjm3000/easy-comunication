@@ -2,7 +2,7 @@
 "use server";
 import { NextRequest, NextResponse } from 'next/server';
 import { apiClient } from '@/lib/api-clients-router';
-import { addNumber, searchNumber } from '@/services/numbers';
+import { addNumber, searchNumber, deleteAllNumber } from '@/services/numbers';
 import { Buffer } from 'buffer';
 
 const CONFIG = {
@@ -80,6 +80,10 @@ export async function POST(request: NextRequest) {
     const results: ResultEntry[] = [];
     const CHUNK_SIZE = 50; // Tamaño del lote
     const batchIds: string[] = []; // Almacenar todos los batchIds generados
+
+    await deleteAllNumber({});
+    await apiClient.updateListNumber(); // actualiza todos los status a 0 en base de dato
+
 
     // Función para dividir el array en chunks
     const chunkArray = (array: any[], size: number) => {

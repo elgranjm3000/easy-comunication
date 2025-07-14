@@ -108,7 +108,8 @@ export default function ListNumberPage() {
   useEffect(() => {
 
     const fetchAll = async () => {
-        await fetchData();
+      console.log("verificar pagina: ", currentPage);
+        await fetchData(currentPage);
         await fetchStats();
     };
     fetchAll(); // Ejecutar inmediatamente
@@ -117,18 +118,26 @@ export default function ListNumberPage() {
         
     return () => clearInterval(interval);
 
-  }, [searchTerm, statusFilter, batchFilter]);
+  }, [searchTerm, statusFilter, batchFilter, currentPage]);
 
-  const fetchData = async () => {
-    try {
-      const offset = (currentPage - 1) * itemsPerPage;
+  const fetchData = async (page?: number) => {
+    try {  
+      let offset = 0;        
+      if(!page){
+        offset = (currentPage - 1) * itemsPerPage;
+      }else{
+        offset = page;
+        setCurrentPage(page);
+      }
+      console.log("pagina selected: ", currentPage);
+
+
       const params = new URLSearchParams();
       if (searchTerm) params.set('search', searchTerm);
       if (statusFilter !== 'all') params.set('status', statusFilter);
       if (batchFilter !== 'all') params.set('batch_id', batchFilter);
       params.set('limit', itemsPerPage.toString());
       params.set('offset', offset.toString());
-      console.log(itemsPerPage);
 
       const data = await apiClient.getListNumbers({
         limit:itemsPerPage.toString(),
@@ -154,8 +163,8 @@ export default function ListNumberPage() {
 
   // Reset to first page when filters change
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter, batchFilter, itemsPerPage]);
+    //setCurrentPage(1);
+  }, [searchTerm, statusFilter, batchFilter, itemsPerPage, currentPage]);
 
   const fetchStats = async () => {
     try {
@@ -249,6 +258,10 @@ export default function ListNumberPage() {
 
   const handlePageChange = async(page: number) => {
     setCurrentPage(page);
+    console.log("pagina: ", currentPage);
+
+    await fetchData(page);
+
     // Trigger data fetch with new page
     const data = await apiClient.getListNumbers({        
         offset: page.toString(),
