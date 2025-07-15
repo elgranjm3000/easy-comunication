@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
                     : [row.Phone_Num];
                 
                 let addResultSend = 0; // 0 = falló, 1 = éxito
-                const maxAttempts = 3; // Máximo de intentos
+                const maxAttempts = 1; // Máximo de intentos
             
                 for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                         console.log(`Intento ${attempt} de enviar SMS...`);
