@@ -121,10 +121,18 @@ export async function GET(request: NextRequest) {
                         addResultSend = sendaddResultSend.data.code;
                 
                         console.log(`Resultado intento ${attempt}:`, addResultSend);
+                        await apiClient.updateHistory(row.id, {
+                          mensaje: (ultimoMensaje as Mensaje).contenido || "-",
+                          code: codeMensaje,
+                      });
                 
                         // 3. Si fue exitoso, salir del bucle
                         if (addResultSend === 1) {
                             console.log("¡Envío exitoso en el intento", attempt, "!");
+                            await apiClient.updateHistory(row.id, {
+                              mensaje: (ultimoMensaje as Mensaje).contenido || "-",
+                              code: codeMensaje,
+                          });
                             break;
                         } else if (attempt < maxAttempts) {
                             console.log("Esperando 2 segundos antes de reintentar...");
