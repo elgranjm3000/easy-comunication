@@ -15,9 +15,9 @@ export async function GET(request: NextRequest) {
 
     // Get status distribution
     const [statusDistribution] = await connection.execute(`
-      SELECT status, COUNT(*) as count 
+      SELECT active_status, COUNT(*) as count 
       FROM listnumber 
-      GROUP BY status
+      GROUP BY active_status
       ORDER BY count DESC
     `);
 
