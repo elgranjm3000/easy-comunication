@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
                 let addResultSend = 0; // 0 = falló, 1 = éxito
                 const maxAttempts = 1; // Máximo de intentos
             
-                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+               /* for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                         console.log(`Intento ${attempt} de enviar SMS...`);
                 
                         // 1. Eliminar y agregar número antes de cada intento
@@ -138,18 +138,15 @@ export async function GET(request: NextRequest) {
                             console.log("Esperando 2 segundos antes de reintentar...");
                             await new Promise(resolve => setTimeout(resolve, 2000)); // Pequeña pausa entre intentos
                         }
-                    }
+                    }*/
                 
                     // 4. Si alguno de los 3 intentos fue exitoso, guardar en historial
-                    if (addResultSend === 1) {
                         await apiClient.updateHistory(row.id, {
                             mensaje: (ultimoMensaje as Mensaje).contenido || "-",
                             code: codeMensaje,
                         });
                         console.log("✅ Historial actualizado.");
-                    } else {
-                        console.log("❌ Todos los intentos fallaron. No se guardó en historial.");
-                    }
+                    
 
                   }else{
                     
