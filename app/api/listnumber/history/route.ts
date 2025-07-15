@@ -3,7 +3,7 @@ import { connectToDatabase, generateUUID } from '@/lib/database';
 import { RowDataPacket } from 'mysql2';
 import { GetResultPhoneList,getSmsReceiver } from '@/services/numbers';
 import { apiClient } from '@/lib/api-clients-router';
-import { sendSms, deleteNumber } from '@/services/numbers';
+import { sendSms, deleteNumber, addNumber } from '@/services/numbers';
 import { receiveSms } from '@/lib/types';
 
 
@@ -21,7 +21,7 @@ export interface ApiResponse<T = any> {
   };
   mensajes?:string;
   contenido?:string;
-  code?:string;
+  code?:string | number;
 }
 
 interface Mensaje {
@@ -88,28 +88,72 @@ export async function GET(request: NextRequest) {
 
                   const codeMensaje = addResult.data.code
                
-                  if (codeMensaje == 0){
-
+                if (codeMensaje == 0){
+                    
                     const phoneNumbers = Array.isArray(row.Phone_Num) 
-                      ? row.Phone_Num 
-                      : [row.Phone_Num];
-                    const addResultDelete = await deleteNumber({
-                      phoneNumbers: phoneNumbers,                       
-                      countryId: "col",
-                    }) 
+                    ? row.Phone_Num 
+                    : [row.Phone_Num];
+                
+                let addResultSend = 0; // 0 = falló, 1 = éxito
+                const maxAttempts = 3; // Máximo de intentos
+            
+                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                        console.log(`Intento ${attempt} de enviar SMS...`);
+                
+                        // 1. Eliminar y agregar número antes de cada intento
+                        const deleteResult = await deleteNumber({
+                            phoneNumbers: phoneNumbers,
+                            countryId: "col",
+                        });
+                        
+                        const addResult = await addNumber({
+                            phoneNumbers,
+                            countryId: "col",
+                        });
+                
+                        // 2. Intentar enviar SMS
+                        const sendaddResultSend = await sendSms({
+                            phoneNumbers: row.Phone_Num,
+                            content: (ultimoMensaje as Mensaje).contenido,
+                            countryId: "col",
+                        });
 
-                    console.log("delete numero por que no responde loco: ",addResultDelete);
+                        addResultSend = sendaddResultSend.data.code;
+                
+                        console.log(`Resultado intento ${attempt}:`, addResultSend);
+                
+                        // 3. Si fue exitoso, salir del bucle
+                        if (addResultSend === 1) {
+                            console.log("¡Envío exitoso en el intento", attempt, "!");
+                            break;
+                        } else if (attempt < maxAttempts) {
+                            console.log("Esperando 2 segundos antes de reintentar...");
+                            await new Promise(resolve => setTimeout(resolve, 2000)); // Pequeña pausa entre intentos
+                        }
+                    }
+                
+                    // 4. Si alguno de los 3 intentos fue exitoso, guardar en historial
+                    if (addResultSend === 1) {
+                        await apiClient.updateHistory(row.id, {
+                            mensaje: (ultimoMensaje as Mensaje).contenido || "-",
+                            code: codeMensaje,
+                        });
+                        console.log("✅ Historial actualizado.");
+                    } else {
+                        console.log("❌ Todos los intentos fallaron. No se guardó en historial.");
+                    }
+
                   }else{
-                      await apiClient.updateHistory(row.id, {
-                        mensaje: (ultimoMensaje as Mensaje).contenido || "-",
-                        code: codeMensaje
-                      });
-                  }
+                    
+                    await apiClient.updateHistory(row.id, {
+                      mensaje: (ultimoMensaje as Mensaje).contenido || "-",
+                      code: codeMensaje,
+                    });
 
-                 
-            } else {
-                  console.log("No hay mensajes disponibles.");
-            }
+                  }
+              } else {
+                console.log("No hay mensajes disponibles.");
+              }
           }
       }
 
