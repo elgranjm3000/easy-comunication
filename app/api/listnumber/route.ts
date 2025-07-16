@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase, generateUUID } from '@/lib/database';
 import { RowDataPacket } from 'mysql2';
+import { Console } from 'console';
 
 // GET - Fetch all listnumbers with optional filtering and pagination
 export async function GET(request: NextRequest) {
@@ -10,6 +11,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const sn = searchParams.get('sn') || '';
+    const active_status = searchParams.get('active_status') || '';
     const id = searchParams.get('id') || '';
     const status = searchParams.get('status') || '';
     const batch_id = searchParams.get('batch_id') || '';
@@ -28,6 +30,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       query += ` AND (
         id = ? OR
+        active_status = ? OR
         port LIKE ? OR 
         iccid LIKE ? OR 
         imei LIKE ? OR 
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
         users_id LIKE ?
       )`;
       const searchTerm = `%${search}%`;
-      params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
     }
 
     // Add status filter
@@ -45,6 +48,11 @@ export async function GET(request: NextRequest) {
     if (id && id !== 'all') {
       query += ` AND id = ?`;
       params.push(id);
+    }
+
+    if (active_status && active_status !== 'all') {
+      query += ` AND active_status = ?`;
+      params.push(active_status);
     }
 
     if (status && status !== 'all') {
@@ -80,7 +88,8 @@ export async function GET(request: NextRequest) {
     
     if (search) {
       countQuery += ` AND (
-        id = ? OR
+        id LIKE ? OR
+        active_status LIKE ?
         port LIKE ? OR 
         iccid LIKE ? OR 
         imei LIKE ? OR 
@@ -90,15 +99,18 @@ export async function GET(request: NextRequest) {
         users_id LIKE ?
       )`;
       const searchTerm = `%${search}%`;
-      countParams.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+      countParams.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+    }
+
+    if (active_status && active_status !== 'all') {
+      countQuery += ` AND active_status = ?`;
+      countParams.push(active_status);
     }
 
     if (id && id !== 'all') {
       countQuery += ` AND id = ?`;
-      params.push(id);
+      countParams.push(id);
     }
-
-
     if (status && status !== 'all') {
       countQuery += ` AND status = ?`;
       countParams.push(status);
@@ -112,6 +124,7 @@ export async function GET(request: NextRequest) {
       countParams.push(users_id);
     }
 
+    
     const [countResult] = await connection.execute(countQuery, countParams);
     const total = (countResult as RowDataPacket[])[0].total;
 

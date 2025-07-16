@@ -64,7 +64,8 @@ export async function PUT(
         Phone_Remark, 
         Phone_RemarkTime,
         mensaje,
-        code
+        code,
+        evaluado
       } = body;
   
       // Verificar si el registro existe
@@ -87,6 +88,11 @@ export async function PUT(
       if (code !== undefined) {
         updateFields.push('code = ?');
         updateValues.push(code);
+      }
+
+      if (evaluado !== undefined) {
+        updateFields.push('evaluado = ?');
+        updateValues.push(evaluado);
       }
       
       if (Item_ID !== undefined) {

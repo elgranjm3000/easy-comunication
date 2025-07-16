@@ -31,8 +31,9 @@ export interface listNumber {
   slot_active?: string | number | undefined;
   batch_id: string;
   status: string;
-  offset: string;
-  limit:string;
+  offset: number;
+  limit:number;
+  active_status: number;
 }
 
 
@@ -227,7 +228,7 @@ class ApiClient {
     offset?:string;
     limit?: string;
     status?:string;
-      
+    active_status? : string;      
   }): Promise<ApiResponse<listNumber[]>> {
     const searchParams = new URLSearchParams();    
     if (params?.id) searchParams.set('id', params.id);    
@@ -237,9 +238,8 @@ class ApiClient {
     if (params?.offset) searchParams.set('offset', params.offset);
     if (params?.limit) searchParams.set('limit', params.limit);
     if (params?.status) searchParams.set('status', params.status);
-
+    if (params?.active_status) searchParams.set('active_status', params.active_status);
     const query = searchParams.toString();
-    console.log(query);
     return this.request<listNumber[]>(`/listnumber${query ? `?${query}` : ''}`);
   }
 
@@ -258,7 +258,8 @@ class ApiClient {
 
   async updateHistory(id: string, data: {   
     mensaje?: string;
-    code?: string;    
+    code?: string;
+    evaluado?: number;    
   }): Promise<ApiResponse<listNumber>> {
     return this.request<listNumber>(`/listnumber/history/${id}`, {
       method: 'PUT',

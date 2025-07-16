@@ -2,7 +2,7 @@
 "use server";
 import { NextRequest, NextResponse } from 'next/server';
 import { apiClient } from '@/lib/api-clients-router';
-import { addNumber, searchNumber, deleteAllNumber } from '@/services/numbers';
+import { addNumber, searchNumber, deleteAllNumber, deleteNumber } from '@/services/numbers';
 import { Buffer } from 'buffer';
 
 const CONFIG = {
@@ -57,6 +57,7 @@ interface AddNumberResponse  {
 
 interface ApiListResponse<T = any> {
   data: T[];  
+  pagination?: any;
 }
 
 interface SMSMessage {
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
     const CHUNK_SIZE = 50; // Tamaño del lote
     const batchIds: string[] = []; // Almacenar todos los batchIds generados
 
-    await deleteAllNumber({});
+    //await deleteAllNumber({}); // ESTO HACE QUE SE MANTENGA LOS SERVICIOS
     await apiClient.updateListNumber(); // actualiza todos los status a 0 en base de dato
 
 
@@ -207,6 +208,78 @@ export async function POST(request: NextRequest) {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
+
+    const listResponse = await apiClient.getListNumbers({ active_status: "0" }) as ApiListResponse;
+    const totalRegistros = listResponse.pagination.total
+
+    console.log("total numero: ",listResponse.pagination.total);
+    const totalPaginas = Math.ceil(totalRegistros / 100);
+    const registrosPorPagina = 100;
+    let pagina = 1;
+    let procesadosTotal = 0;
+    let errores = 0;
+
+      try {
+        while (true) {
+          const offset = (pagina - 1) * registrosPorPagina;
+          
+          // 1. Obtener lote actual
+          const response = await apiClient.getListNumbers({ 
+            active_status: "0", 
+            offset : offset.toString(),
+            limit: registrosPorPagina.toString()
+          }) as ApiListResponse;
+          
+          // Validar respuesta
+          if (!response?.data || response.data.length === 0) {
+            console.log('✅ No hay más registros por procesar');
+            break;
+          }
+
+          // 2. Procesar números
+          const phoneNumbers = response.data
+            .map(smsList => smsList?.sn)
+            .filter((sn): sn is string => !!sn); // Type guard
+
+          // 3. Eliminar lote (si hay números)
+          if (phoneNumbers.length > 0) {
+            try {
+              await deleteNumber({
+                phoneNumbers,
+                countryId: "col",
+              });
+              procesadosTotal += phoneNumbers.length;
+              console.log(`♻️ Lote ${pagina} OK - ${phoneNumbers.length} números`);
+            } catch (error) {
+              errores += phoneNumbers.length;
+              console.error(`❌ Error en lote ${pagina}:`);              
+            }
+          }
+
+          // 4. Controlar siguiente iteración
+          if (response.data.length < registrosPorPagina) {
+            console.log('✅ Última página completada');
+            break;
+          }
+          
+          pagina++;
+          
+          // Pausa entre lotes para no saturar la API
+          await new Promise(resolve => setTimeout(resolve, 500)); // 500ms
+        }
+      } catch (error) {
+        console.error('Error general en el proceso:', error);
+      } finally {
+        console.log(`
+        🏁 Proceso completado:
+        - Páginas procesadas: ${pagina}
+        - Números eliminados: ${procesadosTotal}
+        - Errores: ${errores}
+        `);
+      }
+
+
+
     return NextResponse.json({
       success: true,
       batchIds, // Devolvemos todos los batchIds generados
@@ -245,6 +318,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    
+
     // Construir URL de consulta
     const url = `${process.env.BASE_URL_DINSTAR_MAIN}/goip_get_sms.html`;
     const params = new URLSearchParams({
@@ -274,6 +349,7 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+  
 
     // Procesar los mensajes
     const mensajes = data.data.map((sms: any) => {

@@ -2,7 +2,7 @@ const http = require('http');
 const axios = require('axios'); // Necesitarás axios: npm install axios
 
 //const ENDPOINT = 'http://localhost:3000/api/listnumber/history'; // Reemplaza con tu URL
-const ENDPOINT = 'https://should-republican-u-staffing.trycloudflare.com/api/listnumber/history';
+const ENDPOINT = 'https://belle-empirical-passengers-vulnerable.trycloudflare.com/api/listnumber/history';
 const POLLING_DELAY_MS = 3000; // 3 segundos entre consultas
 
 // Función para consultar el endpoint

@@ -40,15 +40,20 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = `
+    /*let query = `
       SELECT * FROM serviceHistory
-      WHERE 1=1 and (code IS NULL or code = 0)
-    `;
+      WHERE 1=1 and (evaluado IS NULL or evaluado = 0)
+    `;*/
+
+    let query  = `SELECT a.*, b.sn AS numeroList, b.active_status 
+      FROM serviceHistory a INNER 
+      JOIN listnumber b ON CONCAT('57', a.Phone_Num) = b.sn 
+      WHERE 1=1 and b.active_status = 1`;
     
     const params: any[] = [];
    
-    query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    //query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    //params.push(limit, offset);
 
     await getSmsReceiver()
     const [rows] = await connection.execute<RowDataPacket[]>(query, params);
@@ -95,21 +100,27 @@ export async function GET(request: NextRequest) {
                     : [row.Phone_Num];
                 
                 let addResultSend = 0; // 0 = falló, 1 = éxito
-                const maxAttempts = 1; // Máximo de intentos
+                const maxAttempts = 3; // Máximo de intentos
             
-               /* for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                         console.log(`Intento ${attempt} de enviar SMS...`);
+
+                        await apiClient.updateHistory(row.id, {
+                            mensaje: (ultimoMensaje as Mensaje).contenido || "-",
+                            code: codeMensaje,
+                            evaluado:1
+                        });
                 
                         // 1. Eliminar y agregar número antes de cada intento
-                        const deleteResult = await deleteNumber({
+                        /*const deleteResult = await deleteNumber({
                             phoneNumbers: phoneNumbers,
                             countryId: "col",
-                        });
+                        });*/
                         
-                        const addResult = await addNumber({
+                        /*const addResult = await addNumber({
                             phoneNumbers,
                             countryId: "col",
-                        });
+                        });*/
                 
                         // 2. Intentar enviar SMS
                         const sendaddResultSend = await sendSms({
@@ -120,32 +131,27 @@ export async function GET(request: NextRequest) {
 
                         addResultSend = sendaddResultSend.data.code;
                 
-                        console.log(`Resultado intento ${attempt}:`, addResultSend);
-                        await apiClient.updateHistory(row.id, {
-                          mensaje: (ultimoMensaje as Mensaje).contenido || "-",
-                          code: codeMensaje,
-                      });
+                        console.log(`Resultado intento ${attempt}:`, addResultSend);                      
+                      
                 
                         // 3. Si fue exitoso, salir del bucle
                         if (addResultSend === 1) {
                             console.log("¡Envío exitoso en el intento", attempt, "!");
                             await apiClient.updateHistory(row.id, {
                               mensaje: (ultimoMensaje as Mensaje).contenido || "-",
-                              code: codeMensaje,
+                              code: "1",
+                              evaluado:1
                           });
                             break;
                         } else if (attempt < maxAttempts) {
-                            console.log("Esperando 2 segundos antes de reintentar...");
-                            await new Promise(resolve => setTimeout(resolve, 2000)); // Pequeña pausa entre intentos
+                            console.log("Esperando 3 segundos antes de reintentar...");
+                            await new Promise(resolve => setTimeout(resolve, 3000)); // Pequeña pausa entre intentos
                         }
-                    }*/
+                    }
                 
                     // 4. Si alguno de los 3 intentos fue exitoso, guardar en historial
-                        await apiClient.updateHistory(row.id, {
-                            mensaje: (ultimoMensaje as Mensaje).contenido || "-",
-                            code: codeMensaje,
-                        });
-                        console.log("✅ Historial actualizado.");
+                        
+                      //  console.log("✅ Historial actualizado.");
                     
 
                   }else{
@@ -153,8 +159,9 @@ export async function GET(request: NextRequest) {
                     await apiClient.updateHistory(row.id, {
                       mensaje: (ultimoMensaje as Mensaje).contenido || "-",
                       code: codeMensaje,
+                      evaluado:1
                     });
-
+                    console.log("✅ mensaje enviado.");
                   }
               } else {
                 console.log("No hay mensajes disponibles.");
@@ -166,7 +173,7 @@ export async function GET(request: NextRequest) {
     const [rowsList] = await connection.execute(query, params);
 
     // Get total count for pagination
-    let countQuery = `SELECT COUNT(*) as total FROM serviceHistory WHERE 1=1`;
+    let countQuery = `SELECT COUNT(*) as total FROM serviceHistory WHERE evaluado=1`;
     const countParams: any[] = [];   
    
 
@@ -246,9 +253,9 @@ export async function POST(request: NextRequest) {
     // Insert listnumber
     await connection.execute(`
       INSERT INTO serviceHistory (
-        id, Item_ID, Phone_GetTime, Phone_Num, Country_ID
-      ) VALUES (?, ?, ?, ?, ?)
-    `, [listNumberId, Item_ID, Phone_GetTime, Phone_Num, Country_ID]);
+        id, Item_ID, Phone_GetTime, Phone_Num, Country_ID,evaluado
+      ) VALUES (?, ?, ?, ?, ?,?)
+    `, [listNumberId, Item_ID, Phone_GetTime, Phone_Num, Country_ID,0]);
 
     // Fetch the created record
     const [result] = await connection.execute(`
